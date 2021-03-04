@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,7 +16,6 @@
 
 package io.netty.example.http2.tiles;
 
-import static io.netty.buffer.Unpooled.unmodifiableBuffer;
 import static io.netty.buffer.Unpooled.unreleasableBuffer;
 import static io.netty.example.http2.Http2ExampleUtil.toByteBuf;
 import io.netty.buffer.ByteBuf;
@@ -51,8 +50,8 @@ public final class ImageCache {
             for (int x = 0; x < 20; x++) {
                 try {
                     String name = name(x, y);
-                    ByteBuf fileBytes = unreleasableBuffer(unmodifiableBuffer(toByteBuf(getClass()
-                            .getResourceAsStream(name))));
+                    ByteBuf fileBytes = unreleasableBuffer(toByteBuf(getClass()
+                            .getResourceAsStream(name)).asReadOnly());
                     imageBank.put(name, fileBytes);
                 } catch (IOException e) {
                     e.printStackTrace();

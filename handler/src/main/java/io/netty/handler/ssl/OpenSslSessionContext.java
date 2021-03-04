@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -15,13 +15,17 @@
  */
 package io.netty.handler.ssl;
 
-import org.apache.tomcat.jni.SSLContext;
-import org.apache.tomcat.jni.SessionTicketKey;
+import io.netty.internal.tcnative.SSL;
+import io.netty.internal.tcnative.SSLContext;
+import io.netty.internal.tcnative.SessionTicketKey;
+import io.netty.util.internal.ObjectUtil;
 
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSessionContext;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
+import java.util.concurrent.locks.Lock;
 
 /**
  * OpenSSL specific {@link SSLSessionContext} implementation.
@@ -30,18 +34,31 @@ public abstract class OpenSslSessionContext implements SSLSessionContext {
     private static final Enumeration<byte[]> EMPTY = new EmptyEnumeration();
 
     private final OpenSslSessionStats stats;
-    final long context;
 
-    OpenSslSessionContext(long context) {
+    // The OpenSslKeyMaterialProvider is not really used by the OpenSslSessionContext but only be stored here
+    // to make it easier to destroy it later because the ReferenceCountedOpenSslContext will hold a reference
+    // to OpenSslSessionContext.
+    private final OpenSslKeyMaterialProvider provider;
+
+    final ReferenceCountedOpenSslContext context;
+
+    // IMPORTANT: We take the OpenSslContext and not just the long (which points the native instance) to prevent
+    //            the GC to collect OpenSslContext as this would also free the pointer and so could result in a
+    //            segfault when the user calls any of the methods here that try to pass the pointer down to the native
+    //            level.
+    OpenSslSessionContext(ReferenceCountedOpenSslContext context, OpenSslKeyMaterialProvider provider) {
         this.context = context;
+        this.provider = provider;
         stats = new OpenSslSessionStats(context);
+    }
+
+    final boolean useKeyManager() {
+        return provider != null;
     }
 
     @Override
     public SSLSession getSession(byte[] bytes) {
-        if (bytes == null) {
-            throw new NullPointerException("bytes");
-        }
+        ObjectUtil.checkNotNull(bytes, "bytes");
         return null;
     }
 
@@ -56,24 +73,52 @@ public abstract class OpenSslSessionContext implements SSLSessionContext {
      */
     @Deprecated
     public void setTicketKeys(byte[] keys) {
-        if (keys == null) {
-            throw new NullPointerException("keys");
+        if (keys.length % SessionTicketKey.TICKET_KEY_SIZE != 0) {
+            throw new IllegalArgumentException("keys.length % " + SessionTicketKey.TICKET_KEY_SIZE  + " != 0");
         }
-        SSLContext.setSessionTicketKeys(context, keys);
+        SessionTicketKey[] tickets = new SessionTicketKey[keys.length / SessionTicketKey.TICKET_KEY_SIZE];
+        for (int i = 0, a = 0; i < tickets.length; i++) {
+            byte[] name = Arrays.copyOfRange(keys, a, SessionTicketKey.NAME_SIZE);
+            a += SessionTicketKey.NAME_SIZE;
+            byte[] hmacKey = Arrays.copyOfRange(keys, a, SessionTicketKey.HMAC_KEY_SIZE);
+            i += SessionTicketKey.HMAC_KEY_SIZE;
+            byte[] aesKey = Arrays.copyOfRange(keys, a, SessionTicketKey.AES_KEY_SIZE);
+            a += SessionTicketKey.AES_KEY_SIZE;
+            tickets[i] = new SessionTicketKey(name, hmacKey, aesKey);
+        }
+        Lock writerLock = context.ctxLock.writeLock();
+        writerLock.lock();
+        try {
+            SSLContext.clearOptions(context.ctx, SSL.SSL_OP_NO_TICKET);
+            SSLContext.setSessionTicketKeys(context.ctx, tickets);
+        } finally {
+            writerLock.unlock();
+        }
     }
 
     /**
-     * Sets the SSL session ticket keys of this context.
+     * Sets the SSL session ticket keys of this context. Depending on the underlying native library you may omit the
+     * argument or pass an empty array and so let the native library handle the key generation and rotating for you.
+     * If this is supported by the underlying native library should be checked in this case. For example
+     * <a href="https://commondatastorage.googleapis.com/chromium-boringssl-docs/ssl.h.html#Session-tickets/">
+     *     BoringSSL</a> is known to support this.
      */
     public void setTicketKeys(OpenSslSessionTicketKey... keys) {
-        if (keys == null) {
-            throw new NullPointerException("keys");
-        }
+        ObjectUtil.checkNotNull(keys, "keys");
         SessionTicketKey[] ticketKeys = new SessionTicketKey[keys.length];
         for (int i = 0; i < ticketKeys.length; i++) {
             ticketKeys[i] = keys[i].key;
         }
-        SSLContext.setSessionTicketKeys(context, ticketKeys);
+        Lock writerLock = context.ctxLock.writeLock();
+        writerLock.lock();
+        try {
+            SSLContext.clearOptions(context.ctx, SSL.SSL_OP_NO_TICKET);
+            if (ticketKeys.length > 0) {
+                SSLContext.setSessionTicketKeys(context.ctx, ticketKeys);
+            }
+        } finally {
+            writerLock.unlock();
+        }
     }
 
     /**
@@ -91,6 +136,12 @@ public abstract class OpenSslSessionContext implements SSLSessionContext {
      */
     public OpenSslSessionStats stats() {
         return stats;
+    }
+
+    final void destroy() {
+        if (provider != null) {
+            provider.destroy();
+        }
     }
 
     private static final class EmptyEnumeration implements Enumeration<byte[]> {

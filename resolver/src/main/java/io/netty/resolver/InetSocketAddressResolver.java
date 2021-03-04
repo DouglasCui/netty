@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -26,11 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A {@link AbstractAddressResolver} that resolves {@link InetAddress}.
+ * A {@link AbstractAddressResolver} that resolves {@link InetSocketAddress}.
  */
 public class InetSocketAddressResolver extends AbstractAddressResolver<InetSocketAddress> {
 
-    private final NameResolver<InetAddress> nameResolver;
+    final NameResolver<InetAddress> nameResolver;
 
     /**
      * @param executor the {@link EventExecutor} which is used to notify the listeners of the {@link Future} returned
@@ -87,5 +87,10 @@ public class InetSocketAddressResolver extends AbstractAddressResolver<InetSocke
                         }
                     }
                 });
+    }
+
+    @Override
+    public void close() {
+        nameResolver.close();
     }
 }

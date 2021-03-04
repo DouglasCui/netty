@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -29,12 +29,18 @@ public interface ChannelPool extends Closeable {
     /**
      * Acquire a {@link Channel} from this {@link ChannelPool}. The returned {@link Future} is notified once
      * the acquire is successful and failed otherwise.
+     *
+     * <strong>Its important that an acquired is always released to the pool again, even if the {@link Channel}
+     * is explicitly closed..</strong>
      */
     Future<Channel> acquire();
 
     /**
      * Acquire a {@link Channel} from this {@link ChannelPool}. The given {@link Promise} is notified once
      * the acquire is successful and failed otherwise.
+     *
+     * <strong>Its important that an acquired is always released to the pool again, even if the {@link Channel}
+     * is explicitly closed..</strong>
      */
     Future<Channel> acquire(Promise<Channel> promise);
 

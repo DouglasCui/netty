@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,9 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.netty.buffer.Unpooled.*;
-import static io.netty.util.ReferenceCountUtil.releaseLater;
 import static org.hamcrest.core.Is.*;
 import static org.hamcrest.core.IsNull.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class ProtobufVarint32FrameDecoderTest {
@@ -43,10 +43,15 @@ public class ProtobufVarint32FrameDecoderTest {
         assertFalse(ch.writeInbound(wrappedBuffer(b, 1, 2)));
         assertThat(ch.readInbound(), is(nullValue()));
         assertTrue(ch.writeInbound(wrappedBuffer(b, 3, b.length - 3)));
-        assertThat(
-                releaseLater((ByteBuf) ch.readInbound()),
-                is(releaseLater(wrappedBuffer(new byte[] { 1, 1, 1, 1 }))));
+
+        ByteBuf expected = wrappedBuffer(new byte[] { 1, 1, 1, 1 });
+        ByteBuf actual = ch.readInbound();
+
+        assertThat(expected, is(actual));
         assertFalse(ch.finish());
+
+        expected.release();
+        actual.release();
     }
 
     @Test
@@ -64,7 +69,13 @@ public class ProtobufVarint32FrameDecoderTest {
         assertFalse(ch.writeInbound(wrappedBuffer(b, 127, 600)));
         assertThat(ch.readInbound(), is(nullValue()));
         assertTrue(ch.writeInbound(wrappedBuffer(b, 727, b.length - 727)));
-        assertThat(releaseLater((ByteBuf) ch.readInbound()), is(releaseLater(wrappedBuffer(b, 2, b.length - 2))));
+
+        ByteBuf expected = wrappedBuffer(b, 2, b.length - 2);
+        ByteBuf actual = ch.readInbound();
+        assertThat(expected, is(actual));
         assertFalse(ch.finish());
+
+        expected.release();
+        actual.release();
     }
 }

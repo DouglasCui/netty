@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -49,14 +49,14 @@ public abstract class ByteToMessageCodec<I> extends ChannelDuplexHandler {
     };
 
     /**
-     * @see {@link #ByteToMessageCodec(boolean)} with {@code true} as boolean parameter.
+     * see {@link #ByteToMessageCodec(boolean)} with {@code true} as boolean parameter.
      */
     protected ByteToMessageCodec() {
         this(true);
     }
 
     /**
-     * @see {@link #ByteToMessageCodec(Class, boolean)} with {@code true} as boolean value.
+     * see {@link #ByteToMessageCodec(Class, boolean)} with {@code true} as boolean value.
      */
     protected ByteToMessageCodec(Class<? extends I> outboundMessageType) {
         this(outboundMessageType, true);
@@ -70,7 +70,7 @@ public abstract class ByteToMessageCodec<I> extends ChannelDuplexHandler {
      *                              {@link ByteBuf}, which is backed by an byte array.
      */
     protected ByteToMessageCodec(boolean preferDirect) {
-        CodecUtil.ensureNotSharable(this);
+        ensureNotSharable();
         outboundMsgMatcher = TypeParameterMatcher.find(this, ByteToMessageCodec.class, "I");
         encoder = new Encoder(preferDirect);
     }
@@ -84,7 +84,7 @@ public abstract class ByteToMessageCodec<I> extends ChannelDuplexHandler {
      *                              {@link ByteBuf}, which is backed by an byte array.
      */
     protected ByteToMessageCodec(Class<? extends I> outboundMessageType, boolean preferDirect) {
-        CodecUtil.ensureNotSharable(this);
+        ensureNotSharable();
         outboundMsgMatcher = TypeParameterMatcher.get(outboundMessageType);
         encoder = new Encoder(preferDirect);
     }

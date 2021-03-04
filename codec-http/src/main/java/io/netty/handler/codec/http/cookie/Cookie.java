@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,9 +17,14 @@ package io.netty.handler.codec.http.cookie;
 
 /**
  * An interface defining an
- * <a href="http://en.wikipedia.org/wiki/HTTP_cookie">HTTP cookie</a>.
+ * <a href="https://en.wikipedia.org/wiki/HTTP_cookie">HTTP cookie</a>.
  */
 public interface Cookie extends Comparable<Cookie> {
+
+    /**
+     * Constant for undefined MaxAge attribute value.
+     */
+    long UNDEFINED_MAX_AGE = Long.MIN_VALUE;
 
     /**
      * Returns the name of this {@link Cookie}.
@@ -87,7 +92,7 @@ public interface Cookie extends Comparable<Cookie> {
     void setPath(String path);
 
     /**
-     * Returns the maximum age of this {@link Cookie} in seconds or {@link Long#MIN_VALUE} if unspecified
+     * Returns the maximum age of this {@link Cookie} in seconds or {@link Cookie#UNDEFINED_MAX_AGE} if unspecified
      *
      * @return The maximum age of this {@link Cookie}
      */
@@ -97,7 +102,7 @@ public interface Cookie extends Comparable<Cookie> {
      * Sets the maximum age of this {@link Cookie} in seconds.
      * If an age of {@code 0} is specified, this {@link Cookie} will be
      * automatically removed by browser because it will expire immediately.
-     * If {@link Long#MIN_VALUE} is specified, this {@link Cookie} will be removed when the
+     * If {@link Cookie#UNDEFINED_MAX_AGE} is specified, this {@link Cookie} will be removed when the
      * browser is closed.
      *
      * @param maxAge The maximum age of this {@link Cookie} in seconds
@@ -122,7 +127,7 @@ public interface Cookie extends Comparable<Cookie> {
      * Checks to see if this {@link Cookie} can only be accessed via HTTP.
      * If this returns true, the {@link Cookie} cannot be accessed through
      * client side script - But only if the browser supports it.
-     * For more information, please look <a href="http://www.owasp.org/index.php/HTTPOnly">here</a>
+     * For more information, please look <a href="https://owasp.org/www-community/HttpOnly">here</a>
      *
      * @return True if this {@link Cookie} is HTTP-only or false if it isn't
      */
@@ -133,7 +138,7 @@ public interface Cookie extends Comparable<Cookie> {
      * If set to true, this {@link Cookie} cannot be accessed by a client
      * side script. However, this works only if the browser supports it.
      * For for information, please look
-     * <a href="http://www.owasp.org/index.php/HTTPOnly">here</a>.
+     * <a href="https://owasp.org/www-community/HttpOnly">here</a>.
      *
      * @param httpOnly True if the {@link Cookie} is HTTP only, otherwise false.
      */

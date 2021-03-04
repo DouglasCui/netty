@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -32,7 +32,7 @@ import static io.netty.handler.codec.compression.Bzip2Constants.*;
 /**
  * Compresses a {@link ByteBuf} using the Bzip2 algorithm.
  *
- * See <a href="http://en.wikipedia.org/wiki/Bzip2">Bzip2</a>.
+ * See <a href="https://en.wikipedia.org/wiki/Bzip2">Bzip2</a>.
  */
 public class Bzip2Encoder extends MessageToByteEncoder<ByteBuf> {
     /**
@@ -113,27 +113,18 @@ public class Bzip2Encoder extends MessageToByteEncoder<ByteBuf> {
                     out.writeMedium(MAGIC_NUMBER);
                     out.writeByte('0' + streamBlockSize / BASE_BLOCK_SIZE);
                     currentState = State.INIT_BLOCK;
+                    // fall through
                 case INIT_BLOCK:
                     blockCompressor = new Bzip2BlockCompressor(writer, streamBlockSize);
                     currentState = State.WRITE_DATA;
+                    // fall through
                 case WRITE_DATA:
                     if (!in.isReadable()) {
                         return;
                     }
                     Bzip2BlockCompressor blockCompressor = this.blockCompressor;
-                    final int length = in.readableBytes() < blockCompressor.availableSize() ?
-                                    in.readableBytes() : blockCompressor.availableSize();
-                    final int offset;
-                    final byte[] array;
-                    if (in.hasArray()) {
-                        array = in.array();
-                        offset = in.arrayOffset() + in.readerIndex();
-                    } else {
-                        array = new byte[length];
-                        in.getBytes(in.readerIndex(), array);
-                        offset = 0;
-                    }
-                    final int bytesWritten = blockCompressor.write(array, offset, length);
+                    final int length = Math.min(in.readableBytes(), blockCompressor.availableSize());
+                    final int bytesWritten = blockCompressor.write(in, in.readerIndex(), length);
                     in.skipBytes(bytesWritten);
                     if (!blockCompressor.isFull()) {
                         if (in.isReadable()) {
@@ -143,6 +134,7 @@ public class Bzip2Encoder extends MessageToByteEncoder<ByteBuf> {
                         }
                     }
                     currentState = State.CLOSE_BLOCK;
+                    // fall through
                 case CLOSE_BLOCK:
                     closeBlock(out);
                     currentState = State.INIT_BLOCK;

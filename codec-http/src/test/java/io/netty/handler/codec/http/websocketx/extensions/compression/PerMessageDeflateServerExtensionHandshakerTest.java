@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -122,9 +122,9 @@ public class PerMessageDeflateServerExtensionHandshakerTest {
         // test
         assertEquals(PERMESSAGE_DEFLATE_EXTENSION, data.name());
         assertTrue(data.parameters().containsKey(CLIENT_MAX_WINDOW));
-        assertTrue(data.parameters().get(CLIENT_MAX_WINDOW).equals("10"));
+        assertEquals("10", data.parameters().get(CLIENT_MAX_WINDOW));
         assertTrue(data.parameters().containsKey(SERVER_MAX_WINDOW));
-        assertTrue(data.parameters().get(SERVER_MAX_WINDOW).equals("12"));
+        assertEquals("12", data.parameters().get(SERVER_MAX_WINDOW));
         assertTrue(data.parameters().containsKey(CLIENT_MAX_WINDOW));
         assertTrue(data.parameters().containsKey(SERVER_MAX_WINDOW));
 
@@ -150,7 +150,7 @@ public class PerMessageDeflateServerExtensionHandshakerTest {
         assertEquals(PERMESSAGE_DEFLATE_EXTENSION, data.name());
         assertEquals(2, data.parameters().size());
         assertTrue(data.parameters().containsKey(SERVER_MAX_WINDOW));
-        assertTrue(data.parameters().get(SERVER_MAX_WINDOW).equals("12"));
+        assertEquals("12", data.parameters().get(SERVER_MAX_WINDOW));
         assertTrue(data.parameters().containsKey(SERVER_NO_CONTEXT));
 
         // initialize

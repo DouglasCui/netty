@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,12 +21,12 @@ package io.netty.buffer;
 public interface PoolChunkListMetric extends Iterable<PoolChunkMetric> {
 
     /**
-     * Return the minum usage of the chunk list before which chunks are promoted to the previous list.
+     * Return the minimum usage of the chunk list before which chunks are promoted to the previous list.
      */
     int minUsage();
 
     /**
-     * Return the minum usage of the chunk list after which chunks are promoted to the next list.
+     * Return the maximum usage of the chunk list after which chunks are promoted to the next list.
      */
     int maxUsage();
 }

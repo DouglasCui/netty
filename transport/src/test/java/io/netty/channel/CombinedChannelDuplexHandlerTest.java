@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -76,7 +76,7 @@ public class CombinedChannelDuplexHandlerTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testOutboundHandlerImplementsInbboundHandler() {
+    public void testOutboundHandlerImplementsInboundHandler() {
         new CombinedChannelDuplexHandler<ChannelInboundHandler, ChannelOutboundHandler>(
                 new ChannelInboundHandlerAdapter(), new ChannelDuplexHandler());
     }
@@ -363,11 +363,11 @@ public class CombinedChannelDuplexHandlerTest {
         ChannelPipeline pipeline = ch.pipeline();
 
         ChannelPromise promise = ch.newPromise();
-        pipeline.connect(null, null, promise);
+        pipeline.connect(new InetSocketAddress(0), null, promise);
         promise.syncUninterruptibly();
 
         promise = ch.newPromise();
-        pipeline.bind(null, promise);
+        pipeline.bind(new InetSocketAddress(0), promise);
         promise.syncUninterruptibly();
 
         promise = ch.newPromise();
@@ -386,5 +386,15 @@ public class CombinedChannelDuplexHandlerTest {
         pipeline.deregister(promise);
         promise.syncUninterruptibly();
         ch.finish();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testNotSharable() {
+        new CombinedChannelDuplexHandler<ChannelInboundHandler, ChannelOutboundHandler>() {
+            @Override
+            public boolean isSharable() {
+                return true;
+            }
+        };
     }
 }

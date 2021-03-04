@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,26 +17,19 @@ package io.netty.handler.ssl;
 
 interface OpenSslEngineMap {
 
-    OpenSslEngineMap EMPTY = new OpenSslEngineMap() {
-        @Override
-        public OpenSslEngine remove(long ssl) {
-            return null;
-        }
-
-        @Override
-        public void add(OpenSslEngine engine) {
-            // NOOP
-        }
-    };
-
     /**
      * Remove the {@link OpenSslEngine} with the given {@code ssl} address and
      * return it.
      */
-    OpenSslEngine remove(long ssl);
+    ReferenceCountedOpenSslEngine remove(long ssl);
 
     /**
      * Add a {@link OpenSslEngine} to this {@link OpenSslEngineMap}.
      */
-    void add(OpenSslEngine engine);
+    void add(ReferenceCountedOpenSslEngine engine);
+
+    /**
+     * Get the {@link OpenSslEngine} for the given {@code ssl} address.
+     */
+    ReferenceCountedOpenSslEngine get(long ssl);
 }

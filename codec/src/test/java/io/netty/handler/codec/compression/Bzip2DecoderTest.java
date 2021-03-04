@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 import static io.netty.handler.codec.compression.Bzip2Constants.*;
+import static org.junit.Assert.fail;
 
 public class Bzip2DecoderTest extends AbstractDecoderTest {
 
@@ -43,6 +44,19 @@ public class Bzip2DecoderTest extends AbstractDecoderTest {
         channel = new EmbeddedChannel(new Bzip2Decoder());
     }
 
+    private void writeInboundDestroyAndExpectDecompressionException(ByteBuf in) {
+        try {
+            channel.writeInbound(in);
+        } finally {
+            try {
+                destroyChannel();
+                fail();
+            } catch (DecompressionException ignored) {
+                // expected
+            }
+        }
+    }
+
     @Test
     public void testUnexpectedStreamIdentifier() throws Exception {
         expected.expect(DecompressionException.class);
@@ -50,8 +64,7 @@ public class Bzip2DecoderTest extends AbstractDecoderTest {
 
         ByteBuf in = Unpooled.buffer();
         in.writeLong(1823080128301928729L); //random value
-
-        channel.writeInbound(in);
+        writeInboundDestroyAndExpectDecompressionException(in);
     }
 
     @Test
@@ -140,7 +153,7 @@ public class Bzip2DecoderTest extends AbstractDecoderTest {
         data[11] = 0x77;
 
         ByteBuf in = Unpooled.wrappedBuffer(data);
-        channel.writeInbound(in);
+        writeInboundDestroyAndExpectDecompressionException(in);
     }
 
     @Test
@@ -152,7 +165,7 @@ public class Bzip2DecoderTest extends AbstractDecoderTest {
         data[14] = (byte) 0xFF;
 
         ByteBuf in = Unpooled.wrappedBuffer(data);
-        channel.writeInbound(in);
+        writeInboundDestroyAndExpectDecompressionException(in);
     }
 
     @Override

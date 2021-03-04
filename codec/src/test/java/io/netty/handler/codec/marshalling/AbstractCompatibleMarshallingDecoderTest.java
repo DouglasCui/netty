@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -28,9 +28,12 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-public abstract class AbstractCompatibleMarshallingDecoderTest {
+public abstract class AbstractCompatibleMarshallingDecoderTest extends AbstractMarshallingTest {
     @SuppressWarnings("RedundantStringConstructorCall")
     private final String testObject = new String("test");
 
@@ -81,9 +84,9 @@ public abstract class AbstractCompatibleMarshallingDecoderTest {
         byte[] testBytes = bout.toByteArray();
 
         ByteBuf buffer = input(testBytes);
-        ByteBuf slice = buffer.readSlice(2);
+        ByteBuf slice = buffer.readRetainedSlice(2);
 
-        ch.writeInbound(slice.retain());
+        ch.writeInbound(slice);
         ch.writeInbound(buffer);
         assertTrue(ch.finish());
 

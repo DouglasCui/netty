@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,25 +17,19 @@ package io.netty.channel.epoll;
 
 import io.netty.channel.RecvByteBufAllocator;
 
-/**
- * EPOLL must read until no more data is available while in edge triggered mode. This class will always continue reading
- * unless the last read did not fill up the available buffer space.
- */
 final class EpollRecvByteAllocatorStreamingHandle extends EpollRecvByteAllocatorHandle {
-    public EpollRecvByteAllocatorStreamingHandle(RecvByteBufAllocator.Handle handle, boolean isEdgeTriggered) {
-        super(handle, isEdgeTriggered);
+    EpollRecvByteAllocatorStreamingHandle(RecvByteBufAllocator.ExtendedHandle handle) {
+        super(handle);
     }
 
     @Override
-    public boolean continueReading() {
+    boolean maybeMoreDataToRead() {
         /**
-         * if edgeTriggered is used we need to read all bytes/messages as we are not notified again otherwise.
          * For stream oriented descriptors we can assume we are done reading if the last read attempt didn't produce
-         * a full buffer (see Q9 in <a href="http://man7.org/linux/man-pages/man7/epoll.7.html">epoll man</a>).
+         * a full buffer (see Q9 in <a href="https://man7.org/linux/man-pages/man7/epoll.7.html">epoll man</a>).
          *
          * If EPOLLRDHUP has been received we must read until we get a read error.
          */
-        return isRdHup() ? true :
-                           isEdgeTriggered() ? lastBytesRead() == attemptedBytesRead() : super.continueReading();
+        return lastBytesRead() == attemptedBytesRead() || isReceivedRdHup();
     }
 }

@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,6 +17,7 @@ package io.netty.channel.epoll;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ConnectTimeoutException;
 import io.netty.channel.EventLoopGroup;
 import io.netty.util.CharsetUtil;
@@ -94,6 +95,7 @@ public class EpollSocketTcpMd5Test {
                 .handler(new ChannelInboundHandlerAdapter())
                 .option(EpollChannelOption.TCP_MD5SIG,
                         Collections.<InetAddress, byte[]>singletonMap(NetUtil.LOCALHOST4, BAD_KEY))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
                 .connect(server.localAddress()).syncUninterruptibly().channel();
         client.close().syncUninterruptibly();
     }

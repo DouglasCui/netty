@@ -3,7 +3,7 @@
  * The Netty Project licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -258,7 +258,7 @@ public class TrafficShapingHandlerTest extends AbstractSocketTest {
     /**
      *
      * @param additionalExecutor
-     *            shall the pipeline add the handler using an additionnal executor
+     *            shall the pipeline add the handler using an additional executor
      * @param limitRead
      *            True to set Read Limit on Server side
      * @param limitWrite
@@ -324,7 +324,7 @@ public class TrafficShapingHandlerTest extends AbstractSocketTest {
         });
 
         Channel sc = sb.bind().sync().channel();
-        Channel cc = cb.connect().sync().channel();
+        Channel cc = cb.connect(sc.localAddress()).sync().channel();
 
         int totalNb = 0;
         for (int i = 1; i < multipleMessage.length; i++) {
@@ -339,7 +339,7 @@ public class TrafficShapingHandlerTest extends AbstractSocketTest {
 
         promise.await();
         Long stop = TrafficCounter.milliSecondFromNano();
-        assertTrue("Error during exceution of TrafficShapping: " + promise.cause(), promise.isSuccess());
+        assertTrue("Error during execution of TrafficShapping: " + promise.cause(), promise.isSuccess());
 
         float average = (totalNb * messageSize) / (float) (stop - start);
         logger.info("TEST: " + currentTestName + " RUN: " + currentTestRun +

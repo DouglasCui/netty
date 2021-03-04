@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,6 +16,8 @@
 package io.netty.channel.epoll;
 
 import io.netty.util.internal.ObjectUtil;
+
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +28,7 @@ import java.util.Map.Entry;
 final class TcpMd5Util {
 
     static Collection<InetAddress> newTcpMd5Sigs(AbstractEpollChannel channel, Collection<InetAddress> current,
-                                         Map<InetAddress, byte[]> newKeys) {
+                                         Map<InetAddress, byte[]> newKeys) throws IOException {
         ObjectUtil.checkNotNull(channel, "channel");
         ObjectUtil.checkNotNull(current, "current");
         ObjectUtil.checkNotNull(newKeys, "newKeys");
@@ -37,9 +39,7 @@ final class TcpMd5Util {
             if (e.getKey() == null) {
                 throw new IllegalArgumentException("newKeys contains an entry with null address: " + newKeys);
             }
-            if (key == null) {
-                throw new NullPointerException("newKeys[" + e.getKey() + ']');
-            }
+            ObjectUtil.checkNotNull(key, "newKeys[" + e.getKey() + ']');
             if (key.length == 0) {
                 throw new IllegalArgumentException("newKeys[" + e.getKey() + "] has an empty key.");
             }
@@ -53,7 +53,7 @@ final class TcpMd5Util {
         // Remove mappings not present in the new set.
         for (InetAddress addr : current) {
             if (!newKeys.containsKey(addr)) {
-                Native.setTcpMd5Sig(channel.fd().intValue(), addr, null);
+                channel.socket.setTcpMd5Sig(addr, null);
             }
         }
 
@@ -64,7 +64,7 @@ final class TcpMd5Util {
         // Set new mappings and store addresses which we set.
         final Collection<InetAddress> addresses = new ArrayList<InetAddress>(newKeys.size());
         for (Entry<InetAddress, byte[]> e : newKeys.entrySet()) {
-            Native.setTcpMd5Sig(channel.fd().intValue(), e.getKey(), e.getValue());
+            channel.socket.setTcpMd5Sig(e.getKey(), e.getValue());
             addresses.add(e.getKey());
         }
 

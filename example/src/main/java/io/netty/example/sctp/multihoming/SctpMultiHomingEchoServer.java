@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,6 +27,7 @@ import io.netty.channel.sctp.nio.NioSctpServerChannel;
 import io.netty.example.sctp.SctpEchoServerHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.util.internal.SocketUtils;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -60,8 +61,8 @@ public final class SctpMultiHomingEchoServer {
                  }
              });
 
-            InetSocketAddress localAddress = new InetSocketAddress(SERVER_PRIMARY_HOST, SERVER_PORT);
-            InetAddress localSecondaryAddress = InetAddress.getByName(SERVER_SECONDARY_HOST);
+            InetSocketAddress localAddress = SocketUtils.socketAddress(SERVER_PRIMARY_HOST, SERVER_PORT);
+            InetAddress localSecondaryAddress = SocketUtils.addressByName(SERVER_SECONDARY_HOST);
 
             // Bind the server to primary address.
             ChannelFuture bindFuture = b.bind(localAddress).sync();

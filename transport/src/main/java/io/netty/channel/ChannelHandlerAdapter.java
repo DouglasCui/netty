@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,17 +16,27 @@
 
 package io.netty.channel;
 
+import io.netty.channel.ChannelHandlerMask.Skip;
 import io.netty.util.internal.InternalThreadLocalMap;
 
 import java.util.Map;
 
 /**
- * Skelton implementation of a {@link ChannelHandler}.
+ * Skeleton implementation of a {@link ChannelHandler}.
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
     // Not using volatile because it's used only for a sanity check.
     boolean added;
+
+    /**
+     * Throws {@link IllegalStateException} if {@link ChannelHandlerAdapter#isSharable()} returns {@code true}
+     */
+    protected void ensureNotSharable() {
+        if (isSharable()) {
+            throw new IllegalStateException("ChannelHandler " + getClass().getName() + " is not allowed to be shared");
+        }
+    }
 
     /**
      * Return {@code true} if the implementation is {@link Sharable} and so can be added
@@ -72,8 +82,12 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
      * to the next {@link ChannelHandler} in the {@link ChannelPipeline}.
      *
      * Sub-classes may override this method to change behavior.
+     *
+     * @deprecated is part of {@link ChannelInboundHandler}
      */
+    @Skip
     @Override
+    @Deprecated
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.fireExceptionCaught(cause);
     }

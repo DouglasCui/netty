@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -29,7 +29,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.MessageToMessageEncoder;
 
 /**
- * Encodes the requested <a href="http://code.google.com/p/protobuf/">Google
+ * Encodes the requested <a href="https://github.com/google/protobuf">Google
  * Protocol Buffers</a> {@link MessageNano} into a
  * {@link ByteBuf}. A typical setup for TCP/IP would be:
  * <pre>

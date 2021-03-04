@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -22,6 +22,7 @@ import io.netty.util.CharsetUtil;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class HttpServerCodecTest {
@@ -112,6 +113,63 @@ public class HttpServerCodecTest {
         encodedRes.release();
 
         ch.finish();
+    }
+
+    @Test
+    public void testChunkedHeadResponse() {
+        EmbeddedChannel ch = new EmbeddedChannel(new HttpServerCodec());
+
+        // Send the request headers.
+        assertTrue(ch.writeInbound(Unpooled.copiedBuffer(
+                "HEAD / HTTP/1.1\r\n\r\n", CharsetUtil.UTF_8)));
+
+        HttpRequest request = ch.readInbound();
+        assertEquals(HttpMethod.HEAD, request.method());
+        LastHttpContent content = ch.readInbound();
+        assertFalse(content.content().isReadable());
+        content.release();
+
+        HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        HttpUtil.setTransferEncodingChunked(response, true);
+        assertTrue(ch.writeOutbound(response));
+        assertTrue(ch.writeOutbound(LastHttpContent.EMPTY_LAST_CONTENT));
+        assertTrue(ch.finish());
+
+        ByteBuf buf = ch.readOutbound();
+        assertEquals("HTTP/1.1 200 OK\r\ntransfer-encoding: chunked\r\n\r\n", buf.toString(CharsetUtil.US_ASCII));
+        buf.release();
+
+        buf = ch.readOutbound();
+        assertFalse(buf.isReadable());
+        buf.release();
+
+        assertFalse(ch.finishAndReleaseAll());
+    }
+
+    @Test
+    public void testChunkedHeadFullHttpResponse() {
+        EmbeddedChannel ch = new EmbeddedChannel(new HttpServerCodec());
+
+        // Send the request headers.
+        assertTrue(ch.writeInbound(Unpooled.copiedBuffer(
+                "HEAD / HTTP/1.1\r\n\r\n", CharsetUtil.UTF_8)));
+
+        HttpRequest request = ch.readInbound();
+        assertEquals(HttpMethod.HEAD, request.method());
+        LastHttpContent content = ch.readInbound();
+        assertFalse(content.content().isReadable());
+        content.release();
+
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+        HttpUtil.setTransferEncodingChunked(response, true);
+        assertTrue(ch.writeOutbound(response));
+        assertTrue(ch.finish());
+
+        ByteBuf buf = ch.readOutbound();
+        assertEquals("HTTP/1.1 200 OK\r\ntransfer-encoding: chunked\r\n\r\n", buf.toString(CharsetUtil.US_ASCII));
+        buf.release();
+
+        assertFalse(ch.finishAndReleaseAll());
     }
 
     private static ByteBuf prepareDataChunk(int size) {

@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,6 +16,7 @@
 package io.netty.handler.codec.http;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.util.IllegalReferenceCountException;
 
@@ -132,51 +133,34 @@ public class DefaultFullHttpResponse extends DefaultHttpResponse implements Full
         return this;
     }
 
-    /**
-     * Copy this object
-     *
-     * @param copyContent
-     * <ul>
-     * <li>{@code true} if this object's {@link #content()} should be used to copy.</li>
-     * <li>{@code false} if {@code newContent} should be used instead.</li>
-     * </ul>
-     * @param newContent
-     * <ul>
-     * <li>if {@code copyContent} is false then this will be used in the copy's content.</li>
-     * <li>if {@code null} then a default buffer of 0 size will be selected</li>
-     * </ul>
-     * @return A copy of this object
-     */
-    private FullHttpResponse copy(boolean copyContent, ByteBuf newContent) {
-        return new DefaultFullHttpResponse(
-                protocolVersion(), status(),
-                copyContent ? content().copy() :
-                        newContent == null ? Unpooled.buffer(0) : newContent,
-                headers(),
-                trailingHeaders());
-    }
-
-    @Override
-    public FullHttpResponse copy(ByteBuf newContent) {
-        return copy(false, newContent);
-    }
-
     @Override
     public FullHttpResponse copy() {
-        return copy(true, null);
+        return replace(content().copy());
     }
 
     @Override
     public FullHttpResponse duplicate() {
-        return new DefaultFullHttpResponse(protocolVersion(), status(),
-                content().duplicate(), headers(), trailingHeaders());
+        return replace(content().duplicate());
+    }
+
+    @Override
+    public FullHttpResponse retainedDuplicate() {
+        return replace(content().retainedDuplicate());
+    }
+
+    @Override
+    public FullHttpResponse replace(ByteBuf content) {
+        FullHttpResponse response = new DefaultFullHttpResponse(protocolVersion(), status(), content,
+                headers().copy(), trailingHeaders().copy());
+        response.setDecoderResult(decoderResult());
+        return response;
     }
 
     @Override
     public int hashCode() {
         int hash = this.hash;
         if (hash == 0) {
-            if (content().refCnt() != 0) {
+            if (ByteBufUtil.isAccessible(content())) {
                 try {
                     hash = 31 + content().hashCode();
                 } catch (IllegalReferenceCountException ignored) {

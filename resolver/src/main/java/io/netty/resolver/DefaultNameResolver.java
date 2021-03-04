@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,6 +16,7 @@
 
 package io.netty.resolver;
 
+import io.netty.util.internal.SocketUtils;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Promise;
 
@@ -37,7 +38,7 @@ public class DefaultNameResolver extends InetNameResolver {
     @Override
     protected void doResolve(String inetHost, Promise<InetAddress> promise) throws Exception {
         try {
-            promise.setSuccess(InetAddress.getByName(inetHost));
+            promise.setSuccess(SocketUtils.addressByName(inetHost));
         } catch (UnknownHostException e) {
             promise.setFailure(e);
         }
@@ -46,7 +47,7 @@ public class DefaultNameResolver extends InetNameResolver {
     @Override
     protected void doResolveAll(String inetHost, Promise<List<InetAddress>> promise) throws Exception {
         try {
-            promise.setSuccess(Arrays.asList(InetAddress.getAllByName(inetHost)));
+            promise.setSuccess(Arrays.asList(SocketUtils.allAddressesByName(inetHost)));
         } catch (UnknownHostException e) {
             promise.setFailure(e);
         }

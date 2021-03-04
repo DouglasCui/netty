@@ -5,7 +5,7 @@
  * "License"); you may not use this file except in compliance with the License. You may obtain a
  * copy of the License at:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -13,6 +13,8 @@
  * the License.
  */
 package io.netty.util.internal;
+
+import java.util.Collection;
 
 /**
  * A grab-bag of useful utility methods.
@@ -34,7 +36,7 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is strictly positive. If it is, throws {@link IllegalArgumentException}.
+     * Checks that the given argument is strictly positive. If it is not, throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
      */
     public static int checkPositive(int i, String name) {
@@ -45,18 +47,18 @@ public final class ObjectUtil {
     }
 
     /**
-     * Checks that the given argument is strictly positive. If it is, throws {@link IllegalArgumentException}.
+     * Checks that the given argument is strictly positive. If it is not, throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
      */
-    public static long checkPositive(long i, String name) {
-        if (i <= 0) {
-            throw new IllegalArgumentException(name + ": " + i + " (expected: > 0)");
+    public static long checkPositive(long l, String name) {
+        if (l <= 0) {
+            throw new IllegalArgumentException(name + ": " + l + " (expected: > 0)");
         }
-        return i;
+        return l;
     }
 
     /**
-     * Checks that the given argument is positive or zero. If it is, throws {@link IllegalArgumentException}.
+     * Checks that the given argument is positive or zero. If it is not , throws {@link IllegalArgumentException}.
      * Otherwise, returns the argument.
      */
     public static int checkPositiveOrZero(int i, String name) {
@@ -64,6 +66,39 @@ public final class ObjectUtil {
             throw new IllegalArgumentException(name + ": " + i + " (expected: >= 0)");
         }
         return i;
+    }
+
+    /**
+     * Checks that the given argument is positive or zero. If it is not, throws {@link IllegalArgumentException}.
+     * Otherwise, returns the argument.
+     */
+    public static long checkPositiveOrZero(long l, String name) {
+        if (l < 0) {
+            throw new IllegalArgumentException(name + ": " + l + " (expected: >= 0)");
+        }
+        return l;
+    }
+
+    /**
+     * Checks that the given argument is in range. If it is not, throws {@link IllegalArgumentException}.
+     * Otherwise, returns the argument.
+     */
+    public static int checkInRange(int i, int start, int end, String name) {
+        if (i < start || i > end) {
+            throw new IllegalArgumentException(name + ": " + i + " (expected: " + start + "-" + end + ")");
+        }
+        return i;
+    }
+
+    /**
+     * Checks that the given argument is in range. If it is not, throws {@link IllegalArgumentException}.
+     * Otherwise, returns the argument.
+     */
+    public static long checkInRange(long l, long start, long end, String name) {
+        if (l < start || l > end) {
+            throw new IllegalArgumentException(name + ": " + l + " (expected: " + start + "-" + end + ")");
+        }
+        return l;
     }
 
     /**
@@ -78,13 +113,24 @@ public final class ObjectUtil {
     }
 
     /**
+     * Checks that the given argument is neither null nor empty.
+     * If it is, throws {@link NullPointerException} or {@link IllegalArgumentException}.
+     * Otherwise, returns the argument.
+     */
+    public static <T extends Collection<?>> T checkNonEmpty(T collection, String name) {
+        checkNotNull(collection, name);
+        checkPositive(collection.size(), name + ".size");
+        return collection;
+    }
+
+    /**
      * Resolves a possibly null Integer to a primitive int, using a default value.
      * @param wrapper the wrapper
      * @param defaultValue the default value
      * @return the primitive value
      */
     public static int intValue(Integer wrapper, int defaultValue) {
-        return wrapper != null ? wrapper.intValue() : defaultValue;
+        return wrapper != null ? wrapper : defaultValue;
     }
 
     /**
@@ -94,6 +140,6 @@ public final class ObjectUtil {
      * @return the primitive value
      */
     public static long longValue(Long wrapper, long defaultValue) {
-        return wrapper != null ? wrapper.longValue() : defaultValue;
+        return wrapper != null ? wrapper : defaultValue;
     }
 }

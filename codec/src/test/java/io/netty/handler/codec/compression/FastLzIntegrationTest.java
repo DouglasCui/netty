@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -20,6 +20,7 @@ import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -79,8 +80,7 @@ public class FastLzIntegrationTest extends AbstractIntegrationTest {
         ByteBuf msg;
         final CompositeByteBuf compressed = Unpooled.compositeBuffer();
         while ((msg = encoder.readOutbound()) != null) {
-            compressed.addComponent(msg);
-            compressed.writerIndex(compressed.writerIndex() + msg.readableBytes());
+            compressed.addComponent(true, msg);
         }
         assertThat(compressed, is(notNullValue()));
 
@@ -100,8 +100,7 @@ public class FastLzIntegrationTest extends AbstractIntegrationTest {
         assertFalse(compressed.isReadable());
         final CompositeByteBuf decompressed = Unpooled.compositeBuffer();
         while ((msg = decoder.readInbound()) != null) {
-            decompressed.addComponent(msg);
-            decompressed.writerIndex(decompressed.writerIndex() + msg.readableBytes());
+            decompressed.addComponent(true, msg);
         }
         assertEquals(original, decompressed);
 

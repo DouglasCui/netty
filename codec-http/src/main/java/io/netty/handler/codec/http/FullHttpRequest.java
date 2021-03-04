@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -23,10 +23,16 @@ import io.netty.buffer.ByteBuf;
  */
 public interface FullHttpRequest extends HttpRequest, FullHttpMessage {
     @Override
-    FullHttpRequest copy(ByteBuf newContent);
+    FullHttpRequest copy();
 
     @Override
-    FullHttpRequest copy();
+    FullHttpRequest duplicate();
+
+    @Override
+    FullHttpRequest retainedDuplicate();
+
+    @Override
+    FullHttpRequest replace(ByteBuf content);
 
     @Override
     FullHttpRequest retain(int increment);
@@ -39,9 +45,6 @@ public interface FullHttpRequest extends HttpRequest, FullHttpMessage {
 
     @Override
     FullHttpRequest touch(Object hint);
-
-    @Override
-    FullHttpRequest duplicate();
 
     @Override
     FullHttpRequest setProtocolVersion(HttpVersion version);

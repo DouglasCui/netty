@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,8 +27,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.*;
 
 /**
  * Verifies the correct functionality of the {@link AbstractBinaryMemcacheEncoder}.
@@ -46,7 +46,7 @@ public class BinaryMemcacheEncoderTest {
 
     @After
     public void teardown() throws Exception {
-        channel.finish();
+        channel.finishAndReleaseAll();
     }
 
     @Test
@@ -86,15 +86,14 @@ public class BinaryMemcacheEncoderTest {
         int extrasLength = extras.readableBytes();
 
         BinaryMemcacheRequest request = new DefaultBinaryMemcacheRequest(Unpooled.EMPTY_BUFFER, extras);
-        request.setExtrasLength((byte) extrasLength);
 
         boolean result = channel.writeOutbound(request);
         assertThat(result, is(true));
 
         ByteBuf written = channel.readOutbound();
         assertThat(written.readableBytes(), is(DEFAULT_HEADER_SIZE + extrasLength));
-        written.readBytes(DEFAULT_HEADER_SIZE);
-        assertThat(written.readBytes(extrasLength).toString(CharsetUtil.UTF_8), equalTo(extrasContent));
+        written.skipBytes(DEFAULT_HEADER_SIZE);
+        assertThat(written.readSlice(extrasLength).toString(CharsetUtil.UTF_8), equalTo(extrasContent));
         written.release();
     }
 
@@ -104,15 +103,14 @@ public class BinaryMemcacheEncoderTest {
         int keyLength = key.readableBytes();
 
         BinaryMemcacheRequest request = new DefaultBinaryMemcacheRequest(key);
-        request.setKeyLength((byte) keyLength);
 
         boolean result = channel.writeOutbound(request);
         assertThat(result, is(true));
 
         ByteBuf written = channel.readOutbound();
         assertThat(written.readableBytes(), is(DEFAULT_HEADER_SIZE + keyLength));
-        written.readBytes(DEFAULT_HEADER_SIZE);
-        assertThat(written.readBytes(keyLength).toString(CharsetUtil.UTF_8), equalTo("netty"));
+        written.skipBytes(DEFAULT_HEADER_SIZE);
+        assertThat(written.readSlice(keyLength).toString(CharsetUtil.UTF_8), equalTo("netty"));
         written.release();
     }
 
@@ -141,7 +139,7 @@ public class BinaryMemcacheEncoderTest {
         written = channel.readOutbound();
         assertThat(written.readableBytes(), is(content1.content().readableBytes()));
         assertThat(
-                written.readBytes(content1.content().readableBytes()).toString(CharsetUtil.UTF_8),
+                written.readSlice(content1.content().readableBytes()).toString(CharsetUtil.UTF_8),
                 is("Netty")
         );
         written.release();
@@ -149,7 +147,7 @@ public class BinaryMemcacheEncoderTest {
         written = channel.readOutbound();
         assertThat(written.readableBytes(), is(content2.content().readableBytes()));
         assertThat(
-                written.readBytes(content2.content().readableBytes()).toString(CharsetUtil.UTF_8),
+                written.readSlice(content2.content().readableBytes()).toString(CharsetUtil.UTF_8),
                 is(" Rocks!")
         );
         written.release();

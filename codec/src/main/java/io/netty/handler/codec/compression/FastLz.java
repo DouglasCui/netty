@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -59,7 +59,7 @@ final class FastLz {
     /**
      * In this case {@link #compress(byte[], int, int, byte[], int, int)} will choose level
      * automatically depending on the length of the input buffer. If length less than
-     * {@link #MIN_RECOMENDED_LENGTH_FOR_LEVEL_2} {@link #LEVEL_1} will be choosen,
+     * {@link #MIN_RECOMENDED_LENGTH_FOR_LEVEL_2} {@link #LEVEL_1} will be chosen,
      * otherwise {@link #LEVEL_2}.
      */
     static final int LEVEL_AUTO = 0;
@@ -90,6 +90,7 @@ final class FastLz {
      *
      * If the input is not compressible, the return value might be larger than length (input buffer size).
      */
+    @SuppressWarnings("IdentityBinaryExpression")
     static int compress(final byte[] input, final int inOffset, final int inLength,
                         final byte[] output, final int outOffset, final int proposedLevel) {
         final int level;
@@ -167,7 +168,7 @@ final class FastLz {
                         readU16(input, inOffset + ip - 1) == readU16(input, inOffset + ip + 1)) {
                     distance = 1;
                     ip += 3;
-                    ref = anchor - 1 + 3;
+                    ref = anchor + (3 - 1);
 
                     /*
                      * goto match;

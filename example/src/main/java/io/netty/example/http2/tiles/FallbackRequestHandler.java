@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,8 +16,8 @@
 
 package io.netty.example.http2.tiles;
 
+import static io.netty.buffer.Unpooled.EMPTY_BUFFER;
 import static io.netty.buffer.Unpooled.copiedBuffer;
-import static io.netty.buffer.Unpooled.unmodifiableBuffer;
 import static io.netty.buffer.Unpooled.unreleasableBuffer;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_LENGTH;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
@@ -40,15 +40,15 @@ import io.netty.handler.codec.http2.Http2CodecUtil;
  */
 public final class FallbackRequestHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
-    private static final ByteBuf response = unmodifiableBuffer(unreleasableBuffer(copiedBuffer("<!DOCTYPE html>"
+    private static final ByteBuf response = unreleasableBuffer(copiedBuffer("<!DOCTYPE html>"
             + "<html><body><h2>To view the example you need a browser that supports HTTP/2 ("
             + Http2CodecUtil.TLS_UPGRADE_PROTOCOL_NAME
-            + ")</h2></body></html>", UTF_8)));
+            + ")</h2></body></html>", UTF_8)).asReadOnly();
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest req) throws Exception {
         if (HttpUtil.is100ContinueExpected(req)) {
-            ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE));
+            ctx.write(new DefaultFullHttpResponse(HTTP_1_1, CONTINUE, EMPTY_BUFFER));
         }
 
         ByteBuf content = ctx.alloc().buffer();

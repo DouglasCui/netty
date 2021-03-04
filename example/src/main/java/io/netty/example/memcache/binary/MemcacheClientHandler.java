@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -41,8 +41,6 @@ public class MemcacheClientHandler extends ChannelDuplexHandler {
 
             BinaryMemcacheRequest req = new DefaultBinaryMemcacheRequest(key);
             req.setOpcode(BinaryMemcacheOpcodes.GET);
-            req.setKeyLength((short) key.readableBytes());
-            req.setTotalBodyLength(key.readableBytes());
 
             ctx.write(req, promise);
         } else if (command.startsWith("set ")) {
@@ -60,9 +58,6 @@ public class MemcacheClientHandler extends ChannelDuplexHandler {
 
             BinaryMemcacheRequest req = new DefaultFullBinaryMemcacheRequest(key, extras, content);
             req.setOpcode(BinaryMemcacheOpcodes.SET);
-            req.setKeyLength((short) key.readableBytes());
-            req.setExtrasLength((byte) 8);
-            req.setTotalBodyLength(key.readableBytes() + 8 + value.length());
 
             ctx.write(req, promise);
         } else {
@@ -74,6 +69,7 @@ public class MemcacheClientHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         FullBinaryMemcacheResponse res = (FullBinaryMemcacheResponse) msg;
         System.out.println(res.content().toString(CharsetUtil.UTF_8));
+        res.release();
     }
 
     @Override

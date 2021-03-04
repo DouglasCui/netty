@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -22,7 +22,8 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class Socks5CommandResponseDecoderTest {
 
@@ -92,7 +93,7 @@ public class Socks5CommandResponseDecoderTest {
             test(cmdStatus, Socks5AddressType.IPv6,
                  "2001:db8:85a3:42:1000:8a2e:370:7334", 80);
             test(cmdStatus, Socks5AddressType.IPv6,
-                 "1111:111:11:1:0:0:0:1", 80);
+                 "1111:111:11:1::1", 80);
         }
     }
 }

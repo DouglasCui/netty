@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,10 +16,14 @@
 
 package io.netty.util.concurrent;
 
+import io.netty.util.internal.ObjectUtil;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
+ * @deprecated Use {@link PromiseCombiner#PromiseCombiner(EventExecutor)}.
+ *
  * {@link GenericFutureListener} implementation which consolidates multiple {@link Future}s
  * into one, by listening to individual {@link Future}s and producing an aggregated result
  * (success/failure) when all {@link Future}s have completed.
@@ -27,6 +31,7 @@ import java.util.Set;
  * @param <V> the type of value returned by the {@link Future}
  * @param <F> the type of {@link Future}
  */
+@Deprecated
 public class PromiseAggregator<V, F extends Future<V>> implements GenericFutureListener<F> {
 
     private final Promise<?> aggregatePromise;
@@ -40,10 +45,7 @@ public class PromiseAggregator<V, F extends Future<V>> implements GenericFutureL
      * @param failPending  {@code true} to fail pending promises, false to leave them unaffected
      */
     public PromiseAggregator(Promise<Void> aggregatePromise, boolean failPending) {
-        if (aggregatePromise == null) {
-            throw new NullPointerException("aggregatePromise");
-        }
-        this.aggregatePromise = aggregatePromise;
+        this.aggregatePromise = ObjectUtil.checkNotNull(aggregatePromise, "aggregatePromise");
         this.failPending = failPending;
     }
 
@@ -60,9 +62,7 @@ public class PromiseAggregator<V, F extends Future<V>> implements GenericFutureL
      */
     @SafeVarargs
     public final PromiseAggregator<V, F> add(Promise<V>... promises) {
-        if (promises == null) {
-            throw new NullPointerException("promises");
-        }
+        ObjectUtil.checkNotNull(promises, "promises");
         if (promises.length == 0) {
             return this;
         }

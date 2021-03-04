@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,8 +16,11 @@
 
 package io.netty.buffer;
 
+import static io.netty.util.internal.ObjectUtil.checkPositiveOrZero;
+
 import io.netty.util.ByteProcessor;
 import io.netty.util.internal.EmptyArrays;
+import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.PlatformDependent;
 import io.netty.util.internal.StringUtil;
 
@@ -36,6 +39,7 @@ import java.nio.charset.Charset;
  */
 public final class EmptyByteBuf extends ByteBuf {
 
+    static final int EMPTY_BYTE_BUF_HASH_CODE = 1;
     private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.allocateDirect(0);
     private static final long EMPTY_BYTE_BUFFER_ADDRESS;
 
@@ -61,11 +65,7 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     private EmptyByteBuf(ByteBufAllocator alloc, ByteOrder order) {
-        if (alloc == null) {
-            throw new NullPointerException("alloc");
-        }
-
-        this.alloc = alloc;
+        this.alloc = ObjectUtil.checkNotNull(alloc, "alloc");
         this.order = order;
         str = StringUtil.simpleClassName(this) + (order == ByteOrder.BIG_ENDIAN? "BE" : "LE");
     }
@@ -96,6 +96,16 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public ByteBuf asReadOnly() {
+        return Unpooled.unmodifiableBuffer(this);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
     public boolean isDirect() {
         return true;
     }
@@ -107,10 +117,7 @@ public final class EmptyByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf order(ByteOrder endianness) {
-        if (endianness == null) {
-            throw new NullPointerException("endianness");
-        }
-        if (endianness == order()) {
+        if (ObjectUtil.checkNotNull(endianness, "endianness") == order()) {
             return this;
         }
 
@@ -212,9 +219,7 @@ public final class EmptyByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf ensureWritable(int minWritableBytes) {
-        if (minWritableBytes < 0) {
-            throw new IllegalArgumentException("minWritableBytes: " + minWritableBytes + " (expected: >= 0)");
-        }
+        checkPositiveOrZero(minWritableBytes, "minWritableBytes");
         if (minWritableBytes != 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -223,9 +228,7 @@ public final class EmptyByteBuf extends ByteBuf {
 
     @Override
     public int ensureWritable(int minWritableBytes, boolean force) {
-        if (minWritableBytes < 0) {
-            throw new IllegalArgumentException("minWritableBytes: " + minWritableBytes + " (expected: >= 0)");
-        }
+        checkPositiveOrZero(minWritableBytes, "minWritableBytes");
 
         if (minWritableBytes == 0) {
             return 0;
@@ -382,6 +385,12 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public CharSequence getCharSequence(int index, int length, Charset charset) {
+        checkIndex(index, length);
+        return null;
+    }
+
+    @Override
     public ByteBuf setBoolean(int index, boolean value) {
         throw new IndexOutOfBoundsException();
     }
@@ -500,6 +509,11 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public int setCharSequence(int index, CharSequence sequence, Charset charset) {
+        throw new IndexOutOfBoundsException();
+    }
+
+    @Override
     public boolean readBoolean() {
         throw new IndexOutOfBoundsException();
     }
@@ -610,6 +624,11 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public ByteBuf readRetainedSlice(int length) {
+        return checkLength(length);
+    }
+
+    @Override
     public ByteBuf readBytes(ByteBuf dst) {
         return checkLength(dst.writableBytes());
     }
@@ -654,6 +673,12 @@ public final class EmptyByteBuf extends ByteBuf {
     public int readBytes(FileChannel out, long position, int length) {
         checkLength(length);
         return 0;
+    }
+
+    @Override
+    public CharSequence readCharSequence(int length, Charset charset) {
+        checkLength(length);
+        return StringUtil.EMPTY_STRING;
     }
 
     @Override
@@ -728,7 +753,7 @@ public final class EmptyByteBuf extends ByteBuf {
 
     @Override
     public ByteBuf writeBytes(ByteBuf src) {
-        throw new IndexOutOfBoundsException();
+        return checkLength(src.readableBytes());
     }
 
     @Override
@@ -777,6 +802,11 @@ public final class EmptyByteBuf extends ByteBuf {
     @Override
     public ByteBuf writeZero(int length) {
         return checkLength(length);
+    }
+
+    @Override
+    public int writeCharSequence(CharSequence sequence, Charset charset) {
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
@@ -841,12 +871,27 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public ByteBuf retainedSlice() {
+        return this;
+    }
+
+    @Override
     public ByteBuf slice(int index, int length) {
         return checkIndex(index, length);
     }
 
     @Override
+    public ByteBuf retainedSlice(int index, int length) {
+        return checkIndex(index, length);
+    }
+
+    @Override
     public ByteBuf duplicate() {
+        return this;
+    }
+
+    @Override
+    public ByteBuf retainedDuplicate() {
         return this;
     }
 
@@ -912,6 +957,11 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     @Override
+    public boolean isContiguous() {
+        return true;
+    }
+
+    @Override
     public String toString(Charset charset) {
         return "";
     }
@@ -924,7 +974,7 @@ public final class EmptyByteBuf extends ByteBuf {
 
     @Override
     public int hashCode() {
-        return 0;
+        return EMPTY_BYTE_BUF_HASH_CODE;
     }
 
     @Override
@@ -995,9 +1045,7 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     private ByteBuf checkIndex(int index, int length) {
-        if (length < 0) {
-            throw new IllegalArgumentException("length: " + length);
-        }
+        checkPositiveOrZero(length, "length");
         if (index != 0 || length != 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -1005,9 +1053,7 @@ public final class EmptyByteBuf extends ByteBuf {
     }
 
     private ByteBuf checkLength(int length) {
-        if (length < 0) {
-            throw new IllegalArgumentException("length: " + length + " (expected: >= 0)");
-        }
+        checkPositiveOrZero(length, "length");
         if (length != 0) {
             throw new IndexOutOfBoundsException();
         }

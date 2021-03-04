@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -22,18 +22,17 @@ import io.netty.buffer.ByteBuf;
  * message. So it represent a <i>complete</i> http message.
  */
 public interface FullHttpMessage extends HttpMessage, LastHttpContent {
-    /**
-     * Create a copy of this {@link FullHttpMessage} with alternative content.
-     *
-     * @param newContent The buffer to use instead of this {@link FullHttpMessage}'s content in the copy operation.
-     * <p>
-     * NOTE: retain will NOT be called on this buffer. {@code null} results in an empty default choice buffer.
-     * @return The result of the copy operation
-     */
-    FullHttpMessage copy(ByteBuf newContent);
-
     @Override
     FullHttpMessage copy();
+
+    @Override
+    FullHttpMessage duplicate();
+
+    @Override
+    FullHttpMessage retainedDuplicate();
+
+    @Override
+    FullHttpMessage replace(ByteBuf content);
 
     @Override
     FullHttpMessage retain(int increment);
@@ -46,7 +45,4 @@ public interface FullHttpMessage extends HttpMessage, LastHttpContent {
 
     @Override
     FullHttpMessage touch(Object hint);
-
-    @Override
-    FullHttpMessage duplicate();
 }

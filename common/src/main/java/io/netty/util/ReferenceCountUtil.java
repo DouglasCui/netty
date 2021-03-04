@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -25,6 +25,10 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 public final class ReferenceCountUtil {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(ReferenceCountUtil.class);
+
+    static {
+        ResourceLeakDetector.addExclusions(ReferenceCountUtil.class, "touch");
+    }
 
     /**
      * Try to call {@link ReferenceCounted#retain()} if the specified message implements {@link ReferenceCounted}.
@@ -133,7 +137,10 @@ public final class ReferenceCountUtil {
      * Schedules the specified object to be released when the caller thread terminates. Note that this operation is
      * intended to simplify reference counting of ephemeral objects during unit tests. Do not use it beyond the
      * intended use case.
+     *
+     * @deprecated this may introduce a lot of memory usage so it is generally preferable to manually release objects.
      */
+    @Deprecated
     public static <T> T releaseLater(T msg) {
         return releaseLater(msg, 1);
     }
@@ -142,12 +149,23 @@ public final class ReferenceCountUtil {
      * Schedules the specified object to be released when the caller thread terminates. Note that this operation is
      * intended to simplify reference counting of ephemeral objects during unit tests. Do not use it beyond the
      * intended use case.
+     *
+     * @deprecated this may introduce a lot of memory usage so it is generally preferable to manually release objects.
      */
+    @Deprecated
     public static <T> T releaseLater(T msg, int decrement) {
         if (msg instanceof ReferenceCounted) {
             ThreadDeathWatcher.watch(Thread.currentThread(), new ReleasingTask((ReferenceCounted) msg, decrement));
         }
         return msg;
+    }
+
+    /**
+     * Returns reference count of a {@link ReferenceCounted} object. If object is not type of
+     * {@link ReferenceCounted}, {@code -1} is returned.
+     */
+    public static int refCnt(Object msg) {
+        return msg instanceof ReferenceCounted ? ((ReferenceCounted) msg).refCnt() : -1;
     }
 
     /**

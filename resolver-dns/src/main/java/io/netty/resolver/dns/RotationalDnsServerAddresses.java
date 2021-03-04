@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,30 +16,19 @@
 
 package io.netty.resolver.dns;
 
-import io.netty.util.internal.PlatformDependent;
-
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 final class RotationalDnsServerAddresses extends DefaultDnsServerAddresses {
 
-    private static final AtomicIntegerFieldUpdater<RotationalDnsServerAddresses> startIdxUpdater;
-
-    static {
-        AtomicIntegerFieldUpdater<RotationalDnsServerAddresses> updater =
-                PlatformDependent.newAtomicIntegerFieldUpdater(RotationalDnsServerAddresses.class, "startIdx");
-
-        if (updater == null) {
-            updater = AtomicIntegerFieldUpdater.newUpdater(RotationalDnsServerAddresses.class, "startIdx");
-        }
-
-        startIdxUpdater = updater;
-    }
+    private static final AtomicIntegerFieldUpdater<RotationalDnsServerAddresses> startIdxUpdater =
+            AtomicIntegerFieldUpdater.newUpdater(RotationalDnsServerAddresses.class, "startIdx");
 
     @SuppressWarnings("UnusedDeclaration")
     private volatile int startIdx;
 
-    RotationalDnsServerAddresses(InetSocketAddress[] addresses) {
+    RotationalDnsServerAddresses(List<InetSocketAddress> addresses) {
         super("rotational", addresses);
     }
 
@@ -48,7 +37,7 @@ final class RotationalDnsServerAddresses extends DefaultDnsServerAddresses {
         for (;;) {
             int curStartIdx = startIdx;
             int nextStartIdx = curStartIdx + 1;
-            if (nextStartIdx >= addresses.length) {
+            if (nextStartIdx >= addresses.size()) {
                 nextStartIdx = 0;
             }
             if (startIdxUpdater.compareAndSet(this, curStartIdx, nextStartIdx)) {

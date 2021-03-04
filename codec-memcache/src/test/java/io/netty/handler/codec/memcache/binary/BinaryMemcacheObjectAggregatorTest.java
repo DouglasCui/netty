@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -76,7 +76,7 @@ public class BinaryMemcacheObjectAggregatorTest {
 
         assertThat(channel.readInbound(), nullValue());
 
-        channel.finish();
+        assertFalse(channel.finish());
     }
 
     @Test
@@ -89,8 +89,6 @@ public class BinaryMemcacheObjectAggregatorTest {
         ByteBuf key = Unpooled.copiedBuffer("Netty", CharsetUtil.UTF_8);
         ByteBuf extras = Unpooled.copiedBuffer("extras", CharsetUtil.UTF_8);
         BinaryMemcacheRequest request = new DefaultBinaryMemcacheRequest(key, extras);
-        request.setKeyLength((short) key.readableBytes());
-        request.setExtrasLength((byte) extras.readableBytes());
 
         DefaultMemcacheContent content1 =
                 new DefaultMemcacheContent(Unpooled.copiedBuffer("Netty", CharsetUtil.UTF_8));

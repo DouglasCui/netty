@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -27,7 +27,7 @@ import static io.netty.util.AsciiString.CASE_INSENSITIVE_HASHER;
 import static io.netty.util.AsciiString.CASE_SENSITIVE_HASHER;
 
 public class DefaultSpdyHeaders extends DefaultHeaders<CharSequence, CharSequence, SpdyHeaders> implements SpdyHeaders {
-    private static final NameValidator<CharSequence> SpydNameValidator = new NameValidator<CharSequence>() {
+    private static final NameValidator<CharSequence> SpdyNameValidator = new NameValidator<CharSequence>() {
         @Override
         public void validateName(CharSequence name) {
             SpdyCodecUtil.validateHeaderName(name);
@@ -42,7 +42,7 @@ public class DefaultSpdyHeaders extends DefaultHeaders<CharSequence, CharSequenc
     public DefaultSpdyHeaders(boolean validate) {
         super(CASE_INSENSITIVE_HASHER,
                 validate ? HeaderValueConverterAndValidator.INSTANCE : CharSequenceValueConverter.INSTANCE,
-                validate ? SpydNameValidator : NameValidator.NOT_NULL);
+                validate ? SpdyNameValidator : NameValidator.NOT_NULL);
     }
 
     @Override

@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,7 +18,7 @@ package io.netty.channel;
 import io.netty.util.concurrent.PromiseNotifier;
 
 /**
- * ChannelFutureListener implementation which takes other {@link ChannelFuture}(s) and notifies them on completion.
+ * ChannelFutureListener implementation which takes other {@link ChannelPromise}(s) and notifies them on completion.
  */
 public final class ChannelPromiseNotifier
     extends PromiseNotifier<Void, ChannelFuture>
@@ -31,5 +31,15 @@ public final class ChannelPromiseNotifier
      */
     public ChannelPromiseNotifier(ChannelPromise... promises) {
         super(promises);
+    }
+
+    /**
+     * Create a new instance
+     *
+     * @param logNotifyFailure {@code true} if logging should be done in case notification fails.
+     * @param promises  the {@link ChannelPromise}s to notify once this {@link ChannelFutureListener} is notified.
+     */
+    public ChannelPromiseNotifier(boolean logNotifyFailure, ChannelPromise... promises) {
+        super(logNotifyFailure, promises);
     }
 }

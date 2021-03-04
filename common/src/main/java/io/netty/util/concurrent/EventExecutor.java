@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -14,8 +14,6 @@
  * under the License.
  */
 package io.netty.util.concurrent;
-
-import java.util.Set;
 
 /**
  * The {@link EventExecutor} is a special {@link EventExecutorGroup} which comes
@@ -31,12 +29,6 @@ public interface EventExecutor extends EventExecutorGroup {
      */
     @Override
     EventExecutor next();
-
-    /**
-     * Returns an unmodifiable singleton set which contains itself.
-     */
-    @Override
-    <E extends EventExecutor> Set<E> children();
 
     /**
      * Return the {@link EventExecutorGroup} which is the parent of this {@link EventExecutor},

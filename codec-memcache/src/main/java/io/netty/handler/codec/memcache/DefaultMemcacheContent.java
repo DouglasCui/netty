@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -16,11 +16,14 @@
 package io.netty.handler.codec.memcache;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.UnstableApi;
 
 /**
  * The default {@link MemcacheContent} implementation.
  */
+@UnstableApi
 public class DefaultMemcacheContent extends AbstractMemcacheObject implements MemcacheContent {
 
     private final ByteBuf content;
@@ -29,10 +32,7 @@ public class DefaultMemcacheContent extends AbstractMemcacheObject implements Me
      * Creates a new instance with the specified content.
      */
     public DefaultMemcacheContent(ByteBuf content) {
-        if (content == null) {
-            throw new NullPointerException("Content cannot be null.");
-        }
-        this.content = content;
+        this.content = ObjectUtil.checkNotNull(content, "content");
     }
 
     @Override
@@ -42,12 +42,22 @@ public class DefaultMemcacheContent extends AbstractMemcacheObject implements Me
 
     @Override
     public MemcacheContent copy() {
-        return new DefaultMemcacheContent(content.copy());
+        return replace(content.copy());
     }
 
     @Override
     public MemcacheContent duplicate() {
-        return new DefaultMemcacheContent(content.duplicate());
+        return replace(content.duplicate());
+    }
+
+    @Override
+    public MemcacheContent retainedDuplicate() {
+        return replace(content.retainedDuplicate());
+    }
+
+    @Override
+    public MemcacheContent replace(ByteBuf content) {
+        return new DefaultMemcacheContent(content);
     }
 
     @Override

@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -17,6 +17,7 @@
 package io.netty.buffer;
 
 import io.netty.util.ByteProcessor;
+import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
 
 import java.io.IOException;
@@ -41,15 +42,17 @@ class WrappedByteBuf extends ByteBuf {
     protected final ByteBuf buf;
 
     protected WrappedByteBuf(ByteBuf buf) {
-        if (buf == null) {
-            throw new NullPointerException("buf");
-        }
-        this.buf = buf;
+        this.buf = ObjectUtil.checkNotNull(buf, "buf");
     }
 
     @Override
     public final boolean hasMemoryAddress() {
         return buf.hasMemoryAddress();
+    }
+
+    @Override
+    public boolean isContiguous() {
+        return buf.isContiguous();
     }
 
     @Override
@@ -91,6 +94,16 @@ class WrappedByteBuf extends ByteBuf {
     @Override
     public final ByteBuf unwrap() {
         return buf;
+    }
+
+    @Override
+    public ByteBuf asReadOnly() {
+        return buf.asReadOnly();
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return buf.isReadOnly();
     }
 
     @Override
@@ -139,6 +152,11 @@ class WrappedByteBuf extends ByteBuf {
     @Override
     public final int maxWritableBytes() {
         return buf.maxWritableBytes();
+    }
+
+    @Override
+    public int maxFastWritableBytes() {
+        return buf.maxFastWritableBytes();
     }
 
     @Override
@@ -357,6 +375,11 @@ class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    public CharSequence getCharSequence(int index, int length, Charset charset) {
+        return buf.getCharSequence(index, length, charset);
+    }
+
+    @Override
     public ByteBuf setBoolean(int index, boolean value) {
         buf.setBoolean(index, value);
         return this;
@@ -492,6 +515,11 @@ class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    public int setCharSequence(int index, CharSequence sequence, Charset charset) {
+        return buf.setCharSequence(index, sequence, charset);
+    }
+
+    @Override
     public boolean readBoolean() {
         return buf.readBoolean();
     }
@@ -602,6 +630,11 @@ class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    public ByteBuf readRetainedSlice(int length) {
+        return buf.readRetainedSlice(length);
+    }
+
+    @Override
     public ByteBuf readBytes(ByteBuf dst) {
         buf.readBytes(dst);
         return this;
@@ -651,6 +684,11 @@ class WrappedByteBuf extends ByteBuf {
     @Override
     public int readBytes(FileChannel out, long position, int length) throws IOException {
         return buf.readBytes(out, position, length);
+    }
+
+    @Override
+    public CharSequence readCharSequence(int length, Charset charset) {
+        return buf.readCharSequence(length, charset);
     }
 
     @Override
@@ -795,6 +833,11 @@ class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    public int writeCharSequence(CharSequence sequence, Charset charset) {
+        return buf.writeCharSequence(sequence, charset);
+    }
+
+    @Override
     public int indexOf(int fromIndex, int toIndex, byte value) {
         return buf.indexOf(fromIndex, toIndex, value);
     }
@@ -850,13 +893,28 @@ class WrappedByteBuf extends ByteBuf {
     }
 
     @Override
+    public ByteBuf retainedSlice() {
+        return buf.retainedSlice();
+    }
+
+    @Override
     public ByteBuf slice(int index, int length) {
         return buf.slice(index, length);
     }
 
     @Override
+    public ByteBuf retainedSlice(int index, int length) {
+        return buf.retainedSlice(index, length);
+    }
+
+    @Override
     public ByteBuf duplicate() {
         return buf.duplicate();
+    }
+
+    @Override
+    public ByteBuf retainedDuplicate() {
+        return buf.retainedDuplicate();
     }
 
     @Override
@@ -982,5 +1040,10 @@ class WrappedByteBuf extends ByteBuf {
     @Override
     public boolean release(int decrement) {
         return buf.release(decrement);
+    }
+
+    @Override
+    final boolean isAccessible() {
+        return buf.isAccessible();
     }
 }

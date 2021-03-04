@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,6 +21,7 @@ import com.barchart.udt.nio.SocketChannelUDT;
 import io.netty.channel.ChannelException;
 import io.netty.channel.ChannelMetadata;
 import io.netty.channel.ChannelOutboundBuffer;
+import io.netty.util.internal.SocketUtils;
 import io.netty.channel.nio.AbstractNioMessageChannel;
 import io.netty.channel.udt.DefaultUdtServerChannelConfig;
 import io.netty.channel.udt.UdtChannel;
@@ -37,7 +38,10 @@ import static java.nio.channels.SelectionKey.*;
 
 /**
  * Common base for Netty Byte/Message UDT Stream/Datagram acceptors.
+ *
+ * @deprecated The UDT transport is no longer maintained and will be removed.
  */
+@Deprecated
 public abstract class NioUdtAcceptorChannel extends AbstractNioMessageChannel implements UdtServerChannel {
 
     protected static final InternalLogger logger =
@@ -121,8 +125,9 @@ public abstract class NioUdtAcceptorChannel extends AbstractNioMessageChannel im
 
     @Override
     protected SocketAddress localAddress0() {
-        return javaChannel().socket().getLocalSocketAddress();
+        return SocketUtils.localSocketAddress(javaChannel().socket());
     }
+
     @Override
     public InetSocketAddress localAddress() {
         return (InetSocketAddress) super.localAddress();
@@ -145,7 +150,7 @@ public abstract class NioUdtAcceptorChannel extends AbstractNioMessageChannel im
 
     @Override
     protected int doReadMessages(List<Object> buf) throws Exception {
-        final SocketChannelUDT channelUDT = javaChannel().accept();
+        final SocketChannelUDT channelUDT = (SocketChannelUDT) SocketUtils.accept(javaChannel());
         if (channelUDT == null) {
             return 0;
         } else {

@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -18,7 +18,6 @@ package io.netty.handler.codec.http.websocketx.extensions;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.util.internal.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,23 +30,26 @@ import java.util.regex.Pattern;
 
 public final class WebSocketExtensionUtil {
 
-    private static final char EXTENSION_SEPARATOR = ',';
-    private static final char PARAMETER_SEPARATOR = ';';
+    private static final String EXTENSION_SEPARATOR = ",";
+    private static final String PARAMETER_SEPARATOR = ";";
     private static final char PARAMETER_EQUAL = '=';
 
     private static final Pattern PARAMETER = Pattern.compile("^([^=]+)(=[\\\"]?([^\\\"]+)[\\\"]?)?$");
 
     static boolean isWebsocketUpgrade(HttpHeaders headers) {
-        return headers.containsValue(HttpHeaderNames.CONNECTION, HttpHeaderValues.UPGRADE, true) &&
+        //this contains check does not allocate an iterator, and most requests are not upgrades
+        //so we do the contains check first before checking for specific values
+        return headers.contains(HttpHeaderNames.UPGRADE) &&
+                headers.containsValue(HttpHeaderNames.CONNECTION, HttpHeaderValues.UPGRADE, true) &&
                 headers.contains(HttpHeaderNames.UPGRADE, HttpHeaderValues.WEBSOCKET, true);
     }
 
     public static List<WebSocketExtensionData> extractExtensions(String extensionHeader) {
-        String[] rawExtensions = StringUtil.split(extensionHeader, EXTENSION_SEPARATOR);
+        String[] rawExtensions = extensionHeader.split(EXTENSION_SEPARATOR);
         if (rawExtensions.length > 0) {
             List<WebSocketExtensionData> extensions = new ArrayList<WebSocketExtensionData>(rawExtensions.length);
             for (String rawExtension : rawExtensions) {
-                String[] extensionParameters = StringUtil.split(rawExtension, PARAMETER_SEPARATOR);
+                String[] extensionParameters = rawExtension.split(PARAMETER_SEPARATOR);
                 String name = extensionParameters[0].trim();
                 Map<String, String> parameters;
                 if (extensionParameters.length > 1) {
@@ -60,7 +62,7 @@ public final class WebSocketExtensionUtil {
                         }
                     }
                 } else {
-                    parameters = Collections.<String, String>emptyMap();
+                    parameters = Collections.emptyMap();
                 }
                 extensions.add(new WebSocketExtensionData(name, parameters));
             }
@@ -70,30 +72,53 @@ public final class WebSocketExtensionUtil {
         }
     }
 
-    static String appendExtension(String currentHeaderValue, String extensionName,
-            Map<String, String> extensionParameters) {
+    static String computeMergeExtensionsHeaderValue(String userDefinedHeaderValue,
+                                                    List<WebSocketExtensionData> extraExtensions) {
+        List<WebSocketExtensionData> userDefinedExtensions =
+          userDefinedHeaderValue != null ?
+            extractExtensions(userDefinedHeaderValue) :
+            Collections.<WebSocketExtensionData>emptyList();
 
-        StringBuilder newHeaderValue = new StringBuilder(
-                currentHeaderValue != null ? currentHeaderValue.length() : 0 + extensionName.length() + 1);
-        if (currentHeaderValue != null && !currentHeaderValue.trim().isEmpty()) {
-            newHeaderValue.append(currentHeaderValue);
-            newHeaderValue.append(EXTENSION_SEPARATOR);
-        }
-        newHeaderValue.append(extensionName);
-        boolean isFirst = true;
-        for (Entry<String, String> extensionParameter : extensionParameters.entrySet()) {
-            if (isFirst) {
-                newHeaderValue.append(PARAMETER_SEPARATOR);
+        for (WebSocketExtensionData userDefined: userDefinedExtensions) {
+            WebSocketExtensionData matchingExtra = null;
+            int i;
+            for (i = 0; i < extraExtensions.size(); i ++) {
+                WebSocketExtensionData extra = extraExtensions.get(i);
+                if (extra.name().equals(userDefined.name())) {
+                    matchingExtra = extra;
+                    break;
+                }
+            }
+            if (matchingExtra == null) {
+                extraExtensions.add(userDefined);
             } else {
-                isFirst = false;
-            }
-            newHeaderValue.append(extensionParameter.getKey());
-            if (extensionParameter.getValue() != null) {
-                newHeaderValue.append(PARAMETER_EQUAL);
-                newHeaderValue.append(extensionParameter.getValue());
+                // merge with higher precedence to user defined parameters
+                Map<String, String> mergedParameters = new HashMap<String, String>(matchingExtra.parameters());
+                mergedParameters.putAll(userDefined.parameters());
+                extraExtensions.set(i, new WebSocketExtensionData(matchingExtra.name(), mergedParameters));
             }
         }
-        return newHeaderValue.toString();
+
+        StringBuilder sb = new StringBuilder(150);
+
+        for (WebSocketExtensionData data: extraExtensions) {
+            sb.append(data.name());
+            for (Entry<String, String> parameter : data.parameters().entrySet()) {
+                sb.append(PARAMETER_SEPARATOR);
+                sb.append(parameter.getKey());
+                if (parameter.getValue() != null) {
+                    sb.append(PARAMETER_EQUAL);
+                    sb.append(parameter.getValue());
+                }
+            }
+            sb.append(EXTENSION_SEPARATOR);
+        }
+
+        if (!extraExtensions.isEmpty()) {
+            sb.setLength(sb.length() - EXTENSION_SEPARATOR.length());
+        }
+
+        return sb.toString();
     }
 
     private WebSocketExtensionUtil() {

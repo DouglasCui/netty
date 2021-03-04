@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -19,11 +19,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.codec.memcache.AbstractMemcacheObjectEncoder;
-import io.netty.util.CharsetUtil;
+import io.netty.util.internal.UnstableApi;
 
 /**
  * A {@link MessageToByteEncoder} that encodes binary memcache messages into bytes.
  */
+@UnstableApi
 public abstract class AbstractBinaryMemcacheEncoder<M extends BinaryMemcacheMessage>
     extends AbstractMemcacheObjectEncoder<M> {
 

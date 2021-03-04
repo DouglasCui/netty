@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,7 +21,10 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.concurrent.Future;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -58,6 +61,24 @@ public abstract class AbstractEventLoopTest {
         EventExecutor executorNew = channel.pipeline().context(TestChannelHandler.class).executor();
         assertNotSame(executor1, executorNew);
         assertSame(executor, future.channel().pipeline().context(TestChannelHandler2.class).executor());
+    }
+
+    @Test(timeout = 5000)
+    public void testShutdownGracefullyNoQuietPeriod() throws Exception {
+        EventLoopGroup loop = newEventLoopGroup();
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(loop)
+                .channel(newChannel())
+                .childHandler(new ChannelInboundHandlerAdapter());
+
+        // Not close the Channel to ensure the EventLoop is still shutdown in time.
+        b.bind(0).sync().channel();
+
+        Future<?> f = loop.shutdownGracefully(0, 1, TimeUnit.MINUTES);
+        assertTrue(loop.awaitTermination(600, TimeUnit.MILLISECONDS));
+        assertTrue(f.syncUninterruptibly().isSuccess());
+        assertTrue(loop.isShutdown());
+        assertTrue(loop.isTerminated());
     }
 
     private static final class TestChannelHandler extends ChannelDuplexHandler { }

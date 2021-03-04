@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -20,7 +20,7 @@ import io.netty.handler.codec.DecoderException;
 /**
  * A {@link MqttIdentifierRejectedException} which is thrown when a CONNECT request contains invalid client identifier.
  */
-public class MqttIdentifierRejectedException extends DecoderException {
+public final class MqttIdentifierRejectedException extends DecoderException {
 
     private static final long serialVersionUID = -1323503322689614981L;
 

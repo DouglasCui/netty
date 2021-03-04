@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -24,11 +24,11 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
 
-import static com.ning.compress.lzf.LZFChunk.BYTE_Z;
-import static com.ning.compress.lzf.LZFChunk.BYTE_V;
-import static com.ning.compress.lzf.LZFChunk.HEADER_LEN_NOT_COMPRESSED;
-import static com.ning.compress.lzf.LZFChunk.BLOCK_TYPE_NON_COMPRESSED;
 import static com.ning.compress.lzf.LZFChunk.BLOCK_TYPE_COMPRESSED;
+import static com.ning.compress.lzf.LZFChunk.BLOCK_TYPE_NON_COMPRESSED;
+import static com.ning.compress.lzf.LZFChunk.BYTE_V;
+import static com.ning.compress.lzf.LZFChunk.BYTE_Z;
+import static com.ning.compress.lzf.LZFChunk.HEADER_LEN_NOT_COMPRESSED;
 
 /**
  * Uncompresses a {@link ByteBuf} encoded with the LZF format.
@@ -140,6 +140,7 @@ public class LzfDecoder extends ByteToMessageDecoder {
                 if (type != BLOCK_TYPE_COMPRESSED) {
                     break;
                 }
+                // fall through
             case INIT_ORIGINAL_LENGTH:
                 if (in.readableBytes() < 2) {
                     break;
@@ -147,6 +148,7 @@ public class LzfDecoder extends ByteToMessageDecoder {
                 originalLength = in.readUnsignedShort();
 
                 currentState = State.DECOMPRESS_DATA;
+                // fall through
             case DECOMPRESS_DATA:
                 final int chunkLength = this.chunkLength;
                 if (in.readableBytes() < chunkLength) {
@@ -189,7 +191,7 @@ public class LzfDecoder extends ByteToMessageDecoder {
                         recycler.releaseInputBuffer(inputArray);
                     }
                 } else if (chunkLength > 0) {
-                    out.add(in.readSlice(chunkLength).retain());
+                    out.add(in.readRetainedSlice(chunkLength));
                 }
 
                 currentState = State.INIT_BLOCK;

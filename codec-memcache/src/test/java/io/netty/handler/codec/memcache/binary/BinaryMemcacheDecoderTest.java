@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -76,7 +76,7 @@ public class BinaryMemcacheDecoderTest {
 
     @After
     public void teardown() throws Exception {
-        channel.finish();
+        channel.finishAndReleaseAll();
     }
 
     /**
@@ -150,6 +150,7 @@ public class BinaryMemcacheDecoderTest {
         while (incoming.isReadable()) {
             channel.writeInbound(incoming.readBytes(5));
         }
+        incoming.release();
 
         BinaryMemcacheRequest request = channel.readInbound();
 
@@ -259,12 +260,15 @@ public class BinaryMemcacheDecoderTest {
         ByteBuf key = Unpooled.copiedBuffer("Netty", CharsetUtil.UTF_8);
         ByteBuf extras = Unpooled.copiedBuffer("extras", CharsetUtil.UTF_8);
         BinaryMemcacheRequest request = new DefaultBinaryMemcacheRequest(key, extras);
-        request.setKeyLength((short) key.readableBytes());
-        request.setExtrasLength((byte) extras.readableBytes());
 
         assertTrue(channel.writeOutbound(request));
-        assertTrue(channel.writeInbound(channel.outboundMessages().toArray()));
-
+        for (;;) {
+            ByteBuf buffer = channel.readOutbound();
+            if (buffer == null) {
+                break;
+            }
+            channel.writeInbound(buffer);
+        }
         BinaryMemcacheRequest read = channel.readInbound();
         read.release();
         // tearDown will call "channel.finish()"

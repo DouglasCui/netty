@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -156,7 +156,7 @@ public class GlobalChannelTrafficShapingHandler extends AbstractTrafficShapingHa
     }
 
     @Override
-    int userDefinedWritabilityIndex() {
+    protected int userDefinedWritabilityIndex() {
         return AbstractTrafficShapingHandler.GLOBALCHANNEL_DEFAULT_USER_DEFINED_WRITABILITY_INDEX;
     }
 
@@ -547,17 +547,18 @@ public class GlobalChannelTrafficShapingHandler extends AbstractTrafficShapingHa
             if (wait >= MINIMAL_WAIT) { // At least 10ms seems a minimal
                 // time in order to try to limit the traffic
                 // Only AutoRead AND HandlerActive True means Context Active
-                ChannelConfig config = ctx.channel().config();
+                Channel channel = ctx.channel();
+                ChannelConfig config = channel.config();
                 if (logger.isDebugEnabled()) {
                     logger.debug("Read Suspend: " + wait + ':' + config.isAutoRead() + ':'
                             + isHandlerActive(ctx));
                 }
                 if (config.isAutoRead() && isHandlerActive(ctx)) {
                     config.setAutoRead(false);
-                    ctx.attr(READ_SUSPENDED).set(true);
+                    channel.attr(READ_SUSPENDED).set(true);
                     // Create a Runnable to reactive the read if needed. If one was create before it will just be
                     // reused to limit object creation
-                    Attribute<Runnable> attr = ctx.attr(REOPEN_TASK);
+                    Attribute<Runnable> attr = channel.attr(REOPEN_TASK);
                     Runnable reopenTask = attr.get();
                     if (reopenTask == null) {
                         reopenTask = new ReopenReadTimerTask(ctx);
@@ -700,7 +701,7 @@ public class GlobalChannelTrafficShapingHandler extends AbstractTrafficShapingHa
         Integer key = channel.hashCode();
         PerChannel perChannel = channelQueues.get(key);
         if (perChannel == null) {
-            // in case write occurs before handlerAdded is raized for this handler
+            // in case write occurs before handlerAdded is raised for this handler
             // imply a synchronized only if needed
             perChannel = getOrSetPerChannel(ctx);
         }

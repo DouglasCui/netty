@@ -5,7 +5,7 @@
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -35,7 +35,7 @@ public class ByteBufAllocatorBenchmark extends AbstractMicrobenchmark {
 
     private static final ByteBufAllocator unpooledAllocator = new UnpooledByteBufAllocator(true);
     private static final ByteBufAllocator pooledAllocator =
-            new PooledByteBufAllocator(true, 4, 4, 8192, 11, 0, 0, 0); // Disable thread-local cache
+            new PooledByteBufAllocator(true, 4, 4, 8192, 11, 0, 0, 0, true, 0); // Disable thread-local cache
 
     private static final int MAX_LIVE_BUFFERS = 8192;
     private static final Random rand = new Random();
